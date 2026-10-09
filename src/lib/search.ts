@@ -210,6 +210,13 @@ const SYNONYMS: Record<string, string[]> = {
   replace: ["sed"],
   tunnel: ["forward"],
   firewall: ["ufw"],
+  alias: ["aliases", "shorthand", "zsh"],
+  aliases: ["alias", "shorthand", "zsh"],
+  shortcut: ["shortcuts", "alias", "ctrl"],
+  shortcuts: ["shortcut", "alias", "ctrl"],
+  shorthand: ["alias", "shortcuts"],
+  vi: ["vim"],
+  editor: ["vim"],
 }
 
 /** True when `a` and `b` are at most `max` edits apart. Swapping two neighbouring letters is one edit. */

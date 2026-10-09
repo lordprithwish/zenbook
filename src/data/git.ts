@@ -110,7 +110,7 @@ const git: Category = {
       ],
       examples: [["Compact overview", "git status -sb"]],
       notes: ["In short format `M` is modified, `A` added, `D` deleted, `??` untracked."],
-      related: ["add", "diff", "restore", "commit"],
+      related: ["add", "diff", "restore", "commit", "cheatsheets/zsh-git"],
     },
     {
       id: "add",
@@ -162,7 +162,7 @@ const git: Category = {
         "Keep the first line under about 50 characters. Leave a blank line before any longer explanation.",
       ],
       tags: ["save", "snapshot", "amend", "message"],
-      related: ["add", "status", "push", "reset", "cheatsheets/git-everyday"],
+      related: ["add", "status", "push", "reset", "cheatsheets/git-everyday", "cheatsheets/zsh-git"],
     },
     {
       id: "diff",
@@ -293,7 +293,7 @@ const git: Category = {
         ["Your local changes would be overwritten by checkout", "Commit the changes, or set them aside with `git stash push`, switch, then `git stash pop`."],
       ],
       tags: ["checkout", "change branch"],
-      related: ["branch", "status", "stash"],
+      related: ["branch", "status", "stash", "cheatsheets/zsh-git"],
     },
     {
       id: "restore",
@@ -503,7 +503,7 @@ const git: Category = {
         ["The current branch has no upstream branch", "Push once with `git push -u origin <branch>`. After that a plain `git push` works."],
       ],
       tags: ["upload", "publish", "force"],
-      related: ["pull", "commit", "tag", "tools/gh-pr"],
+      related: ["pull", "commit", "tag", "tools/gh-pr", "cheatsheets/zsh-git"],
     },
     {
       id: "reset",

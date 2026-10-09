@@ -267,6 +267,9 @@ assert.ok(top("delete a directory").includes("linux/rm"), "delete")
 assert.ok(top("undo commit", 5).includes("git/reset"), "undo commit")
 assert.ok(top("kubctl logs").includes("kubernetes/logs"), "typo")
 assert.ok(top("dokcer ps").includes("docker/ps"), "typo")
+assert.ok(top("gcam").includes("gcam 'Fix login redirect'"), "zsh alias")
+assert.ok(top("git shortcuts", 5).includes("cheatsheets/zsh-git"), "shortcuts")
+assert.ok(top("vim").includes("cheatsheets/vim"), "vim")
 assert.deepEqual(search(index, "zzzzqqq"), [])
 assert.equal(
   search(index, "status", 1, new Set(["docker/ps"]))[0].key,
