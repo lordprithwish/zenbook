@@ -3,6 +3,14 @@ import assert from "node:assert/strict"
 
 import { categories, cheatsheets } from "../src/data/index.ts"
 import {
+  lookup,
+  recommend,
+  refKey,
+  related,
+  STARTERS,
+} from "../src/lib/catalog.ts"
+import { buildIndex, search } from "../src/lib/search.ts"
+import {
   compile,
   isModified,
   quote,
@@ -231,6 +239,40 @@ for (const sheet of cheatsheets) {
         `${sheet.id}: "${cmd}" needs defaults`
       )
 }
+
+// --- related links point at something real ------------------------------------
+for (const cat of categories)
+  for (const cmd of cat.commands)
+    for (const ref of cmd.related ?? []) {
+      const key = refKey(ref, cat.id)
+      assert.ok(lookup(key), `${cat.id}/${cmd.id}: related "${ref}" not found`)
+      assert.notEqual(key, `${cat.id}/${cmd.id}`, `${key} relates to itself`)
+    }
+for (const key of STARTERS) assert.ok(lookup(key), `starter ${key} not found`)
+// Links work both ways: mv names pwd, so pwd lists mv.
+assert.ok(related("linux/mv").some((i) => i.key === "linux/pwd"))
+assert.ok(related("linux/pwd").some((i) => i.key === "linux/mv"))
+assert.ok(related("cheatsheets/git-undo").some((i) => i.key === "git/reset"))
+const picks = recommend(["linux/mv"])
+assert.ok(picks.length && picks.every(({ item }) => item.key !== "linux/mv"))
+
+// --- search: plain questions, synonyms, typos ----------------------------------
+const index = buildIndex(categories, cheatsheets, [])
+const top = (q: string, n = 3) =>
+  search(index, q, n).map((h) => h.key ?? h.title)
+assert.equal(top("pwd")[0], "linux/pwd")
+assert.ok(top("where am i").includes("linux/pwd"), "where am i")
+assert.ok(top("how do I rename a file").includes("linux/mv"), "rename")
+assert.ok(top("delete a directory").includes("linux/rm"), "delete")
+assert.ok(top("undo commit", 5).includes("git/reset"), "undo commit")
+assert.ok(top("kubctl logs").includes("kubernetes/logs"), "typo")
+assert.ok(top("dokcer ps").includes("docker/ps"), "typo")
+assert.deepEqual(search(index, "zzzzqqq"), [])
+assert.equal(
+  search(index, "status", 1, new Set(["docker/ps"]))[0].key,
+  "git/status",
+  "a favorite boost does not bury an exact name"
+)
 
 console.log(
   `ok: engine checks passed, ${categories.length} categories, ${commands} commands, ${cheatsheets.length} cheatsheets`

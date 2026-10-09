@@ -34,6 +34,7 @@ const tools: Category = {
       ],
       trouble: [["jq: error: Cannot index array with string", "The value is an array where the filter expects an object. Add `[]` to step into it: `.items[].name`."]],
       tags: ["json", "parse", "filter", "api"],
+      related: ["networking/curl", "linux/grep"],
     },
     {
       id: "rg",
@@ -63,6 +64,7 @@ const tools: Category = {
         ["Files that do not contain a line", "rg --files-without-match 'use strict' -t js"],
       ],
       tags: ["ripgrep", "search code", "grep", "find text"],
+      related: ["linux/grep", "fd", "fzf"],
     },
     {
       id: "fd",
@@ -85,6 +87,7 @@ const tools: Category = {
       examples: [["Count the lines of every Markdown file", "fd -e md -x wc -l"]],
       notes: ["On Debian and Ubuntu the program is installed as `fdfind`."],
       tags: ["find files", "search names"],
+      related: ["linux/find", "rg", "fzf"],
     },
     {
       id: "fzf",
@@ -107,6 +110,7 @@ const tools: Category = {
       ],
       notes: ["With the shell integration, Ctrl+R searches your history and Ctrl+T inserts a file path."],
       tags: ["fuzzy finder", "picker", "interactive"],
+      related: ["fd", "rg"],
     },
     {
       id: "tmux",
@@ -128,6 +132,7 @@ const tools: Category = {
       examples: [["Attach if the session exists, otherwise create it", "tmux new -A -s work"]],
       notes: ["Start long jobs on a server inside tmux. If your connection drops, the job keeps running and you can attach again."],
       tags: ["terminal", "multiplexer", "session", "screen"],
+      related: ["ssh/connect", "watch"],
     },
     {
       id: "watch",
@@ -145,6 +150,7 @@ const tools: Category = {
         ["-t", "Hide the header line."],
       ],
       tags: ["repeat", "monitor", "refresh"],
+      related: ["linux/ps", "kubernetes/get"],
     },
     {
       id: "make",
@@ -165,6 +171,7 @@ const tools: Category = {
       examples: [["Use every core", "make -j\"$(nproc)\""]],
       trouble: [["Makefile:3: *** missing separator", "The commands of a rule must start with a tab character, not spaces."]],
       tags: ["build", "makefile", "tasks"],
+      related: ["languages/npm-run"],
     },
     {
       id: "gh-pr",
@@ -191,6 +198,7 @@ const tools: Category = {
         ["Watch the CI run of your last push", "gh run watch"],
       ],
       tags: ["github", "pull request", "pr", "cli"],
+      related: ["git/push", "git/branch"],
     },
     {
       id: "openssl-rand",
@@ -206,6 +214,7 @@ const tools: Category = {
         ["A random password of 20 characters", "LC_ALL=C tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 20; echo"],
       ],
       tags: ["secret", "token", "password", "random", "key"],
+      related: ["base64"],
     },
     {
       id: "openssl-cert",
@@ -236,6 +245,7 @@ const tools: Category = {
       ],
       notes: ["Browsers will warn about a self-signed certificate. For local work, `mkcert` creates certificates your machine trusts."],
       tags: ["tls", "ssl", "certificate", "https", "self-signed"],
+      related: ["networking/tls-check"],
     },
     {
       id: "base64",
@@ -256,6 +266,7 @@ const tools: Category = {
       ],
       notes: ["`printf '%s'` adds no newline. `echo` would, and the newline would become part of the encoded value."],
       tags: ["encode", "decode", "jwt"],
+      related: ["openssl-rand"],
     },
     {
       id: "clipboard",
@@ -268,6 +279,7 @@ const tools: Category = {
       },
       examples: [["Paste the clipboard into a file on macOS", "pbpaste > notes.txt"]],
       tags: ["pbcopy", "xclip", "paste", "copy output"],
+      related: ["linux/pwd"],
     },
     {
       id: "terraform",
@@ -288,6 +300,7 @@ const tools: Category = {
       ],
       examples: [["Review, then apply exactly that", "terraform plan -out=tfplan\nterraform apply tfplan"]],
       tags: ["infrastructure", "iac", "cloud", "opentofu"],
+      related: ["kubernetes/apply"],
     },
   ],
 }

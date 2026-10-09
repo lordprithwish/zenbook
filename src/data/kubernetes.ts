@@ -44,6 +44,7 @@ const kubernetes: Category = {
         ["Everything in a namespace", "kubectl get all -n staging"],
       ],
       tags: ["list", "pods", "deployments", "services"],
+      related: ["describe", "logs", "config", "cheatsheets/kubectl"],
     },
     {
       id: "describe",
@@ -63,6 +64,7 @@ const kubernetes: Category = {
         ["OOMKilled", "The container used more memory than its limit. Raise `resources.limits.memory` or fix the leak."],
       ],
       tags: ["events", "debug", "details", "why"],
+      related: ["get", "logs", "top"],
     },
     {
       id: "logs",
@@ -91,6 +93,7 @@ const kubernetes: Category = {
         ["Why did it crash", "kubectl logs web-7d4b9c6f5-x2k8p --previous"],
       ],
       tags: ["output", "debug", "stream"],
+      related: ["get", "describe", "exec"],
     },
     {
       id: "exec",
@@ -114,6 +117,7 @@ const kubernetes: Category = {
       ],
       trouble: [["executable file not found in $PATH", "The image has no such program. Minimal images often have no shell at all. Attach a debug container instead: `kubectl debug -it <pod> --image=busybox --target=<container>`."]],
       tags: ["shell", "enter pod"],
+      related: ["logs", "port-forward", "get"],
     },
     {
       id: "apply",
@@ -137,6 +141,7 @@ const kubernetes: Category = {
         ["Apply a Kustomize overlay", "kubectl apply -k overlays/production"],
       ],
       tags: ["deploy", "manifest", "yaml", "create"],
+      related: ["get", "rollout", "delete", "helm"],
     },
     {
       id: "delete",
@@ -161,6 +166,7 @@ const kubernetes: Category = {
         ["Remove what a manifest created", "kubectl delete -f k8s/"],
       ],
       tags: ["remove", "destroy"],
+      related: ["get", "apply"],
     },
     {
       id: "rollout",
@@ -181,6 +187,7 @@ const kubernetes: Category = {
       ],
       examples: [["Go back to a known good revision", "kubectl rollout history deployment/web\nkubectl rollout undo deployment/web --to-revision=3"]],
       tags: ["deploy", "rollback", "restart"],
+      related: ["set-image", "get", "scale"],
     },
     {
       id: "scale",
@@ -194,6 +201,7 @@ const kubernetes: Category = {
       },
       notes: ["If a HorizontalPodAutoscaler manages the workload, it will override the number you set."],
       tags: ["replicas", "instances"],
+      related: ["rollout", "get", "top"],
     },
     {
       id: "set-image",
@@ -208,6 +216,7 @@ const kubernetes: Category = {
       },
       examples: [["Roll out and wait for the result", "kubectl set image deployment/web web=registry.example.com/web:1.4.2\nkubectl rollout status deployment/web"]],
       tags: ["deploy", "update image", "release"],
+      related: ["rollout", "apply"],
     },
     {
       id: "port-forward",
@@ -223,6 +232,7 @@ const kubernetes: Category = {
       flags: [["--address 0.0.0.0", "Listen on all interfaces, so other machines can use the forward."]],
       notes: ["The forward lasts as long as the command runs. Stop it with Ctrl+C."],
       tags: ["tunnel", "local access", "debug"],
+      related: ["exec", "networking/curl", "ssh/local-forward"],
     },
     {
       id: "config",
@@ -245,6 +255,7 @@ const kubernetes: Category = {
       ],
       notes: ["Check the context before any command that changes or deletes something. Running it against production by mistake is the classic accident."],
       tags: ["context", "cluster", "namespace", "kubeconfig"],
+      related: ["get", "create-secret"],
     },
     {
       id: "top",
@@ -262,6 +273,7 @@ const kubernetes: Category = {
       ],
       trouble: [["error: Metrics API not available", "The cluster has no metrics-server. Install it, or look at node pressure with `kubectl describe node`."]],
       tags: ["metrics", "cpu", "memory", "usage"],
+      related: ["get", "describe", "scale"],
     },
     {
       id: "create-secret",
@@ -285,6 +297,7 @@ const kubernetes: Category = {
       ],
       notes: ["A literal on the command line ends up in your shell history. Prefer `--from-env-file` for real credentials. Secrets are base64-encoded, not encrypted."],
       tags: ["secret", "credentials", "env"],
+      related: ["apply", "config"],
     },
     {
       id: "run",
@@ -305,6 +318,7 @@ const kubernetes: Category = {
       ],
       examples: [["Check DNS and connectivity from inside the cluster", "kubectl run debug --rm -it --image=nicolaka/netshoot --restart=Never -- bash"]],
       tags: ["debug pod", "temporary", "busybox"],
+      related: ["exec", "logs", "delete"],
     },
     {
       id: "drain",
@@ -323,6 +337,7 @@ const kubernetes: Category = {
       ],
       examples: [["Bring the node back afterwards", "kubectl uncordon node-1"]],
       tags: ["maintenance", "evict", "cordon", "node"],
+      related: ["get", "top"],
     },
     {
       id: "helm",
@@ -356,6 +371,7 @@ const kubernetes: Category = {
         ["Render the manifests locally", "helm template web ./charts/web -f values.staging.yaml"],
       ],
       tags: ["chart", "install", "release", "package"],
+      related: ["apply", "rollout", "get"],
     },
   ],
 }

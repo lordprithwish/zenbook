@@ -3,8 +3,9 @@ import { useEffect, useState, type ReactNode } from "react"
 import { SearchDialog } from "@/components/search"
 import { Drawer, Header, Shell, SidebarNav } from "@/components/shell"
 import { categories, cheatsheets } from "@/data"
+import { lookup } from "@/lib/catalog"
 import { useRoute } from "@/lib/router"
-import { useTemplates } from "@/lib/store"
+import { remember, useTemplates } from "@/lib/store"
 import type { UserTemplate } from "@/lib/types"
 import { CheatsheetPage, CheatsheetsPage } from "@/pages/cheatsheets"
 import { Landing } from "@/pages/landing"
@@ -99,6 +100,12 @@ export function App() {
     if (target?.closest("main")) target.scrollIntoView()
     else window.scrollTo(0, 0)
   }, [route])
+
+  // Commands and sheets the user opens feed "Recent" in search and the recommendations.
+  const visit = route.slice(0, 2).join("/")
+  useEffect(() => {
+    if (lookup(visit, templates)) remember(visit)
+  }, [visit, templates])
 
   useEffect(() => {
     document.title = title

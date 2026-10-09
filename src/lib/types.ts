@@ -22,6 +22,12 @@ export interface Command {
   trouble?: [problem: string, fix: string][]
   /** Extra search keywords. */
   tags?: string[]
+  /**
+   * Commands people often need next, or alongside this one. An id in the same
+   * category ("pwd"), a "category/id", or "cheatsheets/<sheet>". Links are shown
+   * both ways, so a command also lists everything that names it.
+   */
+  related?: string[]
   lang?: Lang
 }
 

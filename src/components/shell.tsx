@@ -217,7 +217,7 @@ export function SidebarNav({ route }: { route: string[] }) {
           My Zenbook
         </NavLink>
         <ul className={list}>
-          {["favorites", "presets", "templates"].map((id) => (
+          {["favorites", "recommended", "presets", "templates"].map((id) => (
             <li key={id}>
               <NavLink
                 to={href("my", id)}

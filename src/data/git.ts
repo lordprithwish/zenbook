@@ -38,6 +38,7 @@ const git: Category = {
         "Use a different email per repository with `git config --local user.email work@example.com`.",
       ],
       tags: ["setup", "identity", "email", "username"],
+      related: ["init", "clone", "ssh/ssh-keygen"],
     },
     {
       id: "init",
@@ -58,6 +59,7 @@ const git: Category = {
       ],
       notes: ["Running `git init` in an existing repository is safe. It does not overwrite anything."],
       tags: ["new", "create", "repository"],
+      related: ["add", "commit", "remote", "config"],
     },
     {
       id: "clone",
@@ -91,6 +93,7 @@ const git: Category = {
         ["destination path already exists and is not an empty directory", "Pick another directory name, or remove the existing folder first."],
       ],
       tags: ["download", "copy", "checkout", "shallow"],
+      related: ["status", "switch", "linux/cd", "remote"],
     },
     {
       id: "status",
@@ -107,6 +110,7 @@ const git: Category = {
       ],
       examples: [["Compact overview", "git status -sb"]],
       notes: ["In short format `M` is modified, `A` added, `D` deleted, `??` untracked."],
+      related: ["add", "diff", "restore", "commit"],
     },
     {
       id: "add",
@@ -130,6 +134,7 @@ const git: Category = {
       ],
       notes: ["Undo staging with `git restore --staged <path>`. The changes stay in your files."],
       tags: ["stage", "index"],
+      related: ["status", "commit", "diff", "restore"],
     },
     {
       id: "commit",
@@ -157,6 +162,7 @@ const git: Category = {
         "Keep the first line under about 50 characters. Leave a blank line before any longer explanation.",
       ],
       tags: ["save", "snapshot", "amend", "message"],
+      related: ["add", "status", "push", "reset", "cheatsheets/git-everyday"],
     },
     {
       id: "diff",
@@ -181,6 +187,7 @@ const git: Category = {
       ],
       notes: ["Three dots (`a...b`) compare `b` with the point where it branched from `a`. Two dots compare the two tips directly."],
       tags: ["changes", "compare"],
+      related: ["status", "add", "log", "show"],
     },
     {
       id: "log",
@@ -211,6 +218,7 @@ const git: Category = {
         ["What a colleague did recently", "git log --since='2 weeks ago' --author='Ada' --oneline"],
       ],
       tags: ["history", "commits", "search"],
+      related: ["show", "diff", "reflog", "blame"],
     },
     {
       id: "show",
@@ -229,6 +237,7 @@ const git: Category = {
         ["A file as it is on another branch", "git show main:config/settings.yml"],
         ["What the commit before last changed", "git show --stat HEAD~1"],
       ],
+      related: ["log", "diff", "blame"],
     },
     {
       id: "branch",
@@ -257,6 +266,7 @@ const git: Category = {
         "A branch deleted with `-D` can usually be recovered from `git reflog` for a few weeks.",
       ],
       tags: ["create", "delete", "rename", "list"],
+      related: ["switch", "merge", "push", "rebase"],
     },
     {
       id: "switch",
@@ -283,6 +293,7 @@ const git: Category = {
         ["Your local changes would be overwritten by checkout", "Commit the changes, or set them aside with `git stash push`, switch, then `git stash pop`."],
       ],
       tags: ["checkout", "change branch"],
+      related: ["branch", "status", "stash"],
     },
     {
       id: "restore",
@@ -305,6 +316,7 @@ const git: Category = {
         ["Take one file from another branch", "git restore --source=main -- config/settings.yml"],
       ],
       tags: ["discard", "undo", "unstage", "checkout"],
+      related: ["status", "reset", "clean", "cheatsheets/git-undo"],
     },
     {
       id: "merge",
@@ -332,6 +344,7 @@ const git: Category = {
         ["Already up to date, but you expected changes", "You are probably merging a stale local copy. Run `git fetch` and merge `origin/<branch>`."],
       ],
       tags: ["combine", "integrate", "conflict"],
+      related: ["rebase", "pull", "branch", "status"],
     },
     {
       id: "rebase",
@@ -361,6 +374,7 @@ const git: Category = {
         ["Commits seem to be gone afterwards", "They are still in `git reflog`. Find the hash from before the rebase and run `git reset --hard <hash>`."],
       ],
       tags: ["squash", "history", "reword", "fixup"],
+      related: ["merge", "pull", "reflog", "log"],
     },
     {
       id: "stash",
@@ -388,6 +402,7 @@ const git: Category = {
       ],
       notes: ["`git stash pop` keeps the stash if applying it causes a conflict. Resolve the conflict, then run `git stash drop`."],
       tags: ["save", "wip", "shelve"],
+      related: ["switch", "status", "pull"],
     },
     {
       id: "remote",
@@ -412,6 +427,7 @@ const git: Category = {
         ["Add the original repository of a fork", "git remote add upstream https://github.com/original/project.git"],
       ],
       tags: ["origin", "upstream", "url"],
+      related: ["fetch", "push", "pull", "clone"],
     },
     {
       id: "fetch",
@@ -431,6 +447,7 @@ const git: Category = {
       examples: [["Check what is new before you merge", "git fetch origin\ngit log --oneline HEAD..origin/main"]],
       notes: ["Fetch is always safe. It updates `origin/*` and leaves your branches and files alone."],
       tags: ["download", "update", "sync"],
+      related: ["pull", "remote", "log"],
     },
     {
       id: "pull",
@@ -454,6 +471,7 @@ const git: Category = {
         ["There is no tracking information for the current branch", "Name the remote and branch, or set the upstream once with `git branch --set-upstream-to=origin/main`."],
       ],
       tags: ["update", "sync", "download"],
+      related: ["fetch", "merge", "rebase", "stash"],
     },
     {
       id: "push",
@@ -485,6 +503,7 @@ const git: Category = {
         ["The current branch has no upstream branch", "Push once with `git push -u origin <branch>`. After that a plain `git push` works."],
       ],
       tags: ["upload", "publish", "force"],
+      related: ["pull", "commit", "tag", "tools/gh-pr"],
     },
     {
       id: "reset",
@@ -512,6 +531,7 @@ const git: Category = {
       ],
       notes: ["For commits that are already pushed, prefer `git revert`. It undoes the change without rewriting history."],
       tags: ["undo", "uncommit", "discard", "rollback"],
+      related: ["revert", "restore", "reflog", "cheatsheets/git-undo"],
     },
     {
       id: "revert",
@@ -533,6 +553,7 @@ const git: Category = {
       ],
       notes: ["Revert is the safe way to undo on a shared branch, because history only moves forward."],
       tags: ["undo", "rollback"],
+      related: ["reset", "log", "cherry-pick", "cheatsheets/git-undo"],
     },
     {
       id: "cherry-pick",
@@ -551,6 +572,7 @@ const git: Category = {
       ],
       examples: [["Copy a range of commits, oldest first", "git cherry-pick a1b2c3d^..f4e5d6c"]],
       tags: ["copy commit", "backport"],
+      related: ["log", "revert", "rebase"],
     },
     {
       id: "tag",
@@ -574,6 +596,7 @@ const git: Category = {
       ],
       notes: ["Tags are not pushed by `git push`. Push them by name, or all at once with `git push --tags`."],
       tags: ["release", "version"],
+      related: ["push", "log", "show"],
     },
     {
       id: "reflog",
@@ -592,6 +615,7 @@ const git: Category = {
         "The reflog is local and entries expire, by default after 90 days.",
       ],
       tags: ["recover", "undo", "lost commits"],
+      related: ["reset", "log", "cheatsheets/git-undo"],
     },
     {
       id: "clean",
@@ -614,6 +638,7 @@ const git: Category = {
       ],
       examples: [["Reset a checkout to a pristine state", "git clean -fdx"]],
       tags: ["delete", "untracked", "remove"],
+      related: ["status", "restore", "reset"],
     },
     {
       id: "blame",
@@ -631,6 +656,7 @@ const git: Category = {
       ],
       examples: [["Ignore a commit that only reformatted the code", "git blame --ignore-rev a1b2c3d src/app.js"]],
       tags: ["author", "who", "annotate"],
+      related: ["log", "show", "bisect"],
     },
     {
       id: "bisect",
@@ -652,6 +678,7 @@ const git: Category = {
       ],
       notes: ["Git checks out a commit halfway between good and bad. Test it, answer `git bisect good` or `git bisect bad`, and repeat until it names the first bad commit."],
       tags: ["debug", "regression", "find bug"],
+      related: ["log", "blame", "show"],
     },
   ],
 }

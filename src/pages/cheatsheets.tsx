@@ -7,9 +7,11 @@ import { useState } from "react"
 
 import { Fields, useBuilder } from "@/components/builder"
 import { CommandLine, CopyButton } from "@/components/code"
+import { FavoriteButton, ItemList } from "@/components/items"
 import { Page, Section } from "@/components/shell"
 import { Button } from "@/components/ui/button"
 import { cheatsheets } from "@/data"
+import { related } from "@/lib/catalog"
 import { href } from "@/lib/router"
 import type { Cheatsheet } from "@/lib/types"
 import { cn, slugify } from "@/lib/utils"
@@ -82,6 +84,8 @@ export function CheatRow({ row: [template, desc, danger] }: { row: Row }) {
 
 export function CheatsheetPage({ sheet }: { sheet: Cheatsheet }) {
   const [filter, setFilter] = useState("")
+  const key = `cheatsheets/${sheet.id}`
+  const links = related(key)
   const terms = filter.toLowerCase().split(/\s+/).filter(Boolean)
   const groups = sheet.groups
     .map((group) => ({
@@ -97,10 +101,21 @@ export function CheatsheetPage({ sheet }: { sheet: Cheatsheet }) {
       path={[["cheatsheets", href("cheatsheets")], [sheet.id]]}
       title={sheet.title}
       lead={sheet.summary}
-      toc={sheet.groups.map((group) => ({
-        label: group.title,
-        to: href("cheatsheets", sheet.id, slugify(group.title)),
-      }))}
+      actions={<FavoriteButton itemKey={key} name={sheet.title} full />}
+      toc={[
+        ...sheet.groups.map((group) => ({
+          label: group.title,
+          to: href("cheatsheets", sheet.id, slugify(group.title)),
+        })),
+        ...(links.length
+          ? [
+              {
+                label: "Commands",
+                to: href("cheatsheets", sheet.id, "commands"),
+              },
+            ]
+          : []),
+      ]}
     >
       <label className="relative block max-w-sm">
         <span className="sr-only">Filter this sheet</span>
@@ -133,6 +148,15 @@ export function CheatsheetPage({ sheet }: { sheet: Cheatsheet }) {
           library instead.
         </p>
       )}
+      {links.length > 0 && (
+        <Section id="commands" title="Commands in depth">
+          <p className="-mt-2 text-sm text-muted-foreground">
+            The full reference, with flags and a builder, for commands on this
+            sheet.
+          </p>
+          <ItemList items={links} />
+        </Section>
+      )}
     </Page>
   )
 }
@@ -146,10 +170,15 @@ export function CheatsheetsPage() {
     >
       <ul className="grid gap-4 sm:grid-cols-2">
         {cheatsheets.map((sheet) => (
-          <li key={sheet.id}>
+          <li key={sheet.id} className="relative">
+            <FavoriteButton
+              itemKey={`cheatsheets/${sheet.id}`}
+              name={sheet.title}
+              className="absolute top-2.5 right-2.5"
+            />
             <a
               href={href("cheatsheets", sheet.id)}
-              className="flex h-full flex-col gap-1.5 rounded-lg border p-4 outline-none hover:border-link/50 hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex h-full flex-col gap-1.5 rounded-lg border p-4 pr-12 outline-none hover:border-link/50 hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring"
             >
               <span className="font-semibold">{sheet.title}</span>
               <span className="text-sm leading-relaxed text-muted-foreground">

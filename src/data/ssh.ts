@@ -44,6 +44,7 @@ const ssh: Category = {
         ["Connection refused", "The machine answered but nothing listens on that port. The SSH service is stopped or uses another port."],
       ],
       tags: ["remote", "login", "shell", "connect"],
+      related: ["ssh-keygen", "config", "scp", "cheatsheets/ssh"],
     },
     {
       id: "ssh-keygen",
@@ -74,6 +75,7 @@ const ssh: Category = {
         "You share the `.pub` file. The file without an extension is the private key and never leaves your machine.",
       ],
       tags: ["key", "generate", "public key", "ed25519"],
+      related: ["ssh-copy-id", "ssh-add", "connect"],
     },
     {
       id: "ssh-copy-id",
@@ -90,6 +92,7 @@ const ssh: Category = {
         ["The same thing by hand, where ssh-copy-id is missing", "cat ~/.ssh/id_ed25519.pub | ssh deploy@example.com 'mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys'"],
       ],
       tags: ["authorized_keys", "passwordless", "install key"],
+      related: ["ssh-keygen", "connect"],
     },
     {
       id: "ssh-add",
@@ -107,6 +110,7 @@ const ssh: Category = {
       ],
       examples: [["Start an agent in this shell", "eval \"$(ssh-agent -s)\""]],
       tags: ["agent", "passphrase"],
+      related: ["ssh-keygen", "connect"],
     },
     {
       id: "config",
@@ -130,6 +134,7 @@ const ssh: Category = {
         "The file must not be writable by others: `chmod 600 ~/.ssh/config`.",
       ],
       tags: ["alias", "ssh_config", "shortcut", "bastion"],
+      related: ["connect", "jump"],
     },
     {
       id: "scp",
@@ -152,6 +157,7 @@ const ssh: Category = {
       examples: [["Fetch a file from the server", "scp deploy@example.com:/var/log/nginx/error.log ./"]],
       notes: ["For large trees, or anything you copy more than once, `rsync` is faster. It only sends what changed and can resume."],
       tags: ["copy", "upload", "download", "transfer"],
+      related: ["rsync", "connect", "linux/cp"],
     },
     {
       id: "rsync",
@@ -182,6 +188,7 @@ const ssh: Category = {
       ],
       notes: ["The trailing slash matters. `src/` copies what is inside src. `src` copies the directory, giving you `dest/src`."],
       tags: ["sync", "mirror", "deploy", "backup", "copy"],
+      related: ["scp", "linux/cp"],
     },
     {
       id: "local-forward",
@@ -205,6 +212,7 @@ const ssh: Category = {
       ],
       notes: ["While the command runs, connect your client to `localhost` and the local port. Stop the tunnel with Ctrl+C."],
       tags: ["tunnel", "port forward", "database access"],
+      related: ["remote-forward", "socks", "kubernetes/port-forward"],
     },
     {
       id: "remote-forward",
@@ -223,6 +231,7 @@ const ssh: Category = {
       ],
       notes: ["By default the remote port only accepts connections from the server itself. To open it to the outside, the server needs `GatewayPorts yes` in `sshd_config`."],
       tags: ["tunnel", "reverse", "expose", "share localhost"],
+      related: ["local-forward", "socks"],
     },
     {
       id: "socks",
@@ -237,6 +246,7 @@ const ssh: Category = {
       examples: [["Send one request through the proxy", "curl --socks5-hostname localhost:1080 https://example.com"]],
       notes: ["Point a browser's SOCKS5 proxy setting at `localhost` and the port. Its traffic then leaves from the SSH server."],
       tags: ["proxy", "tunnel", "socks5"],
+      related: ["local-forward", "jump"],
     },
     {
       id: "jump",
@@ -252,6 +262,7 @@ const ssh: Category = {
       examples: [["Copy a file through the jump host", "scp -J deploy@bastion.example.com ./app.tar.gz deploy@10.0.1.20:/srv/"]],
       notes: ["Your key is used for both hops and never has to be copied to the jump host."],
       tags: ["bastion", "proxyjump", "private network"],
+      related: ["config", "connect"],
     },
   ],
 }

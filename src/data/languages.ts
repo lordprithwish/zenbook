@@ -29,6 +29,7 @@ const languages: Category = {
         "With `uv` installed, `uv venv` and `uv pip install` do the same, much faster.",
       ],
       tags: ["python", "virtualenv", "environment", "uv"],
+      related: ["pip", "pytest"],
     },
     {
       id: "pip",
@@ -57,6 +58,7 @@ const languages: Category = {
         ["ModuleNotFoundError after installing", "The package went into a different Python than the one running your code. Using `python -m pip` installs into the interpreter you call."],
       ],
       tags: ["python", "packages", "dependencies", "requirements"],
+      related: ["python-venv", "pytest"],
     },
     {
       id: "python-http-server",
@@ -71,6 +73,7 @@ const languages: Category = {
       warn: "Without --bind the server listens on every interface, so anyone on your network can browse and download the directory. It is a development tool with no access control.",
       examples: [["Preview a static build", "python3 -m http.server 8000 --bind 127.0.0.1 --directory dist"]],
       tags: ["python", "static server", "serve files", "localhost"],
+      related: ["networking/curl", "kubernetes/port-forward"],
     },
     {
       id: "pytest",
@@ -97,6 +100,7 @@ const languages: Category = {
         ["Rerun failures, with the debugger on error", "pytest --lf --pdb"],
       ],
       tags: ["python", "test", "unit tests"],
+      related: ["python-venv", "pip"],
     },
     {
       id: "nvm",
@@ -117,6 +121,7 @@ const languages: Category = {
         ["Make a version the default", "nvm alias default 22"],
       ],
       tags: ["node", "nodejs", "version manager"],
+      related: ["node", "npm-install"],
     },
     {
       id: "npm-install",
@@ -147,6 +152,7 @@ const languages: Category = {
         ["EACCES: permission denied", "A global install is trying to write to a system directory. Use a Node version manager such as nvm, not `sudo npm`."],
       ],
       tags: ["node", "npm", "packages", "dependencies"],
+      related: ["npm-run", "nvm"],
     },
     {
       id: "npm-run",
@@ -167,6 +173,7 @@ const languages: Category = {
         ["Run a package binary without installing it", "npx create-vite@latest my-app"],
       ],
       tags: ["node", "scripts", "npx"],
+      related: ["npm-install", "node"],
     },
     {
       id: "node",
@@ -191,6 +198,7 @@ const languages: Category = {
         ["Run the tests of a project with the built-in runner", "node --test"],
       ],
       tags: ["node", "javascript", "run", "debug"],
+      related: ["nvm", "npm-run"],
     },
     {
       id: "go-build",
@@ -214,6 +222,7 @@ const languages: Category = {
         ["A small static binary for a container", "CGO_ENABLED=0 go build -ldflags '-s -w' -o bin/app ./cmd/app"],
       ],
       tags: ["go", "golang", "compile", "cross compile"],
+      related: ["go-test", "go-get"],
     },
     {
       id: "go-test",
@@ -239,6 +248,7 @@ const languages: Category = {
         ["Benchmarks with memory statistics", "go test -bench=. -benchmem ./..."],
       ],
       tags: ["go", "golang", "test", "benchmark"],
+      related: ["go-build"],
     },
     {
       id: "go-get",
@@ -260,6 +270,7 @@ const languages: Category = {
         ["Update all dependencies", "go get -u ./...\ngo mod tidy"],
       ],
       tags: ["go", "golang", "modules", "dependencies"],
+      related: ["go-build"],
     },
     {
       id: "cargo",
@@ -284,6 +295,7 @@ const languages: Category = {
         ["Pass arguments to your program", "cargo run -- --input data.csv"],
       ],
       tags: ["rust", "build", "test", "lint"],
+      related: ["cargo-add"],
     },
     {
       id: "cargo-add",
@@ -301,6 +313,7 @@ const languages: Category = {
         ["cargo tree", "Show the dependency tree."],
       ],
       tags: ["rust", "crate", "dependencies"],
+      related: ["cargo"],
     },
     {
       id: "java",
@@ -326,6 +339,7 @@ const languages: Category = {
       ],
       trouble: [["java.lang.OutOfMemoryError: Java heap space", "The application needs more heap than `-Xmx` allows. Raise it, or look for the leak with a heap dump: `-XX:+HeapDumpOnOutOfMemoryError`."]],
       tags: ["java", "jvm", "jar", "maven", "gradle"],
+      related: ["linux/ps"],
     },
   ],
 }

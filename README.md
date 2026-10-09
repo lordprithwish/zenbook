@@ -12,7 +12,13 @@ editable variables, in one fast static site.
   update, copy all of it or one part.
 - **Cheatsheets**: compact pages where every line copies with one click and lines with
   values can be edited in place.
-- **My Zenbook**: favorites, presets and your own templates, stored in the browser.
+- **Search**: ask in plain words ("how do I rename a file", "where am I"). Filler words are
+  ignored, common words map to command names, and small typos are forgiven. Filter by
+  commands, cheatsheets or favorites. With an empty box it shows favorites and recent pages.
+- **Related commands**: every command lists the ones you usually need next, like `pwd` for
+  `mv`, and every cheatsheet links to the full reference of its commands.
+- **My Zenbook**: favorite commands and cheatsheets (by group or as one flat list),
+  recommendations based on them, presets and your own templates, stored in the browser.
 
 No account, no backend. The output is a folder of static files.
 
@@ -67,10 +73,16 @@ Add an object to the `commands` array of a category file such as `src/data/git.t
   notes: ["Tips. Backticks mark `inline code`."],
   trouble: [["The error message", "How to fix it."]],
   tags: ["extra", "search", "words"],
+  related: ["status", "linux/cd", "cheatsheets/git-everyday"],
 }
 ```
 
 Only `id`, `name`, `summary` and `template` are required.
+
+`related` lists what people tend to need next: an id in the same category, a
+`category/id`, or `cheatsheets/<sheet>`. Links show both ways, so the commands named here
+list this one too, and a sheet lists every command that names it. `pnpm check` fails on a
+link to something that does not exist.
 
 ### Template syntax
 

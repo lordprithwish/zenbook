@@ -1,18 +1,24 @@
-import { ArrowRightIcon, StarIcon, TrashIcon } from "@phosphor-icons/react"
+import { ArrowRightIcon, TrashIcon } from "@phosphor-icons/react"
 import { useMemo, useState, type FormEvent, type ReactNode } from "react"
 
 import { CommandLine, CopyButton, highlight } from "@/components/code"
+import { FavoriteButton, ItemList } from "@/components/items"
 import { Page, Section } from "@/components/shell"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { categories } from "@/data"
+import { lookup, recommend, STARTERS, type Item } from "@/lib/catalog"
 import { href } from "@/lib/router"
 import {
   newId,
   useDraft,
   useFavorites,
+  useFavoritesView,
   usePresets,
+  useRecent,
   useTemplates,
+  type FavoritesView,
 } from "@/lib/store"
+import { cn } from "@/lib/utils"
 import { compile, render, templateText } from "@/lib/template"
 import type { Command, Preset, UserTemplate } from "@/lib/types"
 import { CommandRow } from "@/pages/library"
@@ -283,54 +289,173 @@ function PresetRow({
   )
 }
 
+/** One favorite: a command with the user's values, ready to copy, or a cheatsheet. */
+function FavoriteRow({ item }: { item: Item }) {
+  const star = <FavoriteButton itemKey={item.key} name={item.title} />
+  if (item.cmd && item.catId)
+    return <CommandRow catId={item.catId} cmd={item.cmd} action={star} />
+  return (
+    <li className="flex items-start gap-1 rounded-md border bg-muted/40 py-0.5 pr-0.5 pl-3">
+      <a
+        href={item.href}
+        className="min-w-0 flex-1 rounded-sm py-1.5 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <span className="font-semibold hover:text-link">{item.title}</span>
+        <span className="ml-2 label-mono text-[11px] text-muted-foreground">
+          Cheatsheet
+        </span>
+        <span className="block text-sm text-muted-foreground">{item.sub}</span>
+      </a>
+      {star}
+    </li>
+  )
+}
+
+const VIEWS: [FavoritesView, string][] = [
+  ["grouped", "By group"],
+  ["flat", "Flat list"],
+]
+
+/** Favorites in the order of the site: sheets, then each category, then the user's templates. */
+function groupFavorites(items: Item[]): [title: string, items: Item[]][] {
+  const order = [
+    "Cheatsheet",
+    ...categories.map((c) => c.title),
+    "My templates",
+  ]
+  return order
+    .map((group): [string, Item[]] => [
+      group === "Cheatsheet" ? "Cheatsheets" : group,
+      items.filter((item) => item.group === group),
+    ])
+    .filter(([, list]) => list.length)
+}
+
+function Favorites() {
+  const [favorites] = useFavorites()
+  const [templates] = useTemplates()
+  const [view, setView] = useFavoritesView()
+  const items = favorites.flatMap((key) => lookup(key, templates) ?? [])
+
+  if (!items.length)
+    return (
+      <Empty>
+        No favorites yet. Press the star on any command or cheatsheet to keep it
+        here. Commands keep the values you last used.
+      </Empty>
+    )
+
+  return (
+    <>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm text-muted-foreground">
+          {items.length} saved
+          {view === "flat" ? ", most recently added first" : ""}
+        </p>
+        <div
+          role="group"
+          aria-label="Show favorites"
+          className="flex rounded-md border p-0.5 label-mono text-xs"
+        >
+          {VIEWS.map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              aria-pressed={view === id}
+              onClick={() => setView(id)}
+              className="rounded-sm px-2.5 py-1 text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring aria-pressed:bg-muted aria-pressed:text-foreground"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+      {view === "flat" ? (
+        <ul className="flex flex-col gap-6">
+          {[...items].reverse().map((item) => (
+            <FavoriteRow key={item.key} item={item} />
+          ))}
+        </ul>
+      ) : (
+        groupFavorites(items).map(([title, list]) => (
+          <div key={title} className="flex flex-col gap-3">
+            <h3 className="text-sm font-semibold">
+              {title}{" "}
+              <span className="font-normal text-muted-foreground">
+                {list.length}
+              </span>
+            </h3>
+            <ul
+              className={cn(
+                "flex flex-col",
+                list[0].kind === "sheet" ? "gap-2" : "gap-6"
+              )}
+            >
+              {list.map((item) => (
+                <FavoriteRow key={item.key} item={item} />
+              ))}
+            </ul>
+          </div>
+        ))
+      )}
+    </>
+  )
+}
+
+/** Picks based on what the user favorited and opened, or a starter set for a first visit. */
+function Recommended() {
+  const [favorites] = useFavorites()
+  const [recent] = useRecent()
+  const picks = recommend([...new Set([...favorites, ...recent])])
+  if (picks.length) {
+    const why = new Map(picks.map(({ item, via }) => [item.key, via]))
+    return (
+      <ItemList
+        items={picks.map(({ item }) => item)}
+        note={(item) => (
+          <>
+            Goes with{" "}
+            <span className={cn(why.get(item.key)?.mono && "font-mono")}>
+              {why.get(item.key)?.title}
+            </span>
+          </>
+        )}
+      />
+    )
+  }
+  return (
+    <>
+      <p className="-mt-2 text-sm text-muted-foreground">
+        A few good places to start. Once you favorite or open commands, this
+        list suggests the ones that usually go with them.
+      </p>
+      <ItemList items={STARTERS.flatMap((key) => lookup(key) ?? [])} />
+    </>
+  )
+}
+
 export function MyPage() {
-  const [favorites, setFavorites] = useFavorites()
   const [presets, setPresets] = usePresets()
   const [templates] = useTemplates()
-  const starred = favorites.flatMap((key) => findCommand(key, templates) ?? [])
 
   return (
     <Page
       path={[["my"]]}
       title="My Zenbook"
       lead="Your favorites, saved presets and own templates. They are stored in this browser only: no account, no sync, nothing sent anywhere."
-      toc={["Favorites", "Presets", "Templates"].map((label) => ({
-        label,
-        to: href("my", label.toLowerCase()),
-      }))}
+      toc={["Favorites", "Recommended", "Presets", "Templates"].map(
+        (label) => ({
+          label,
+          to: href("my", label.toLowerCase()),
+        })
+      )}
     >
       <Section id="favorites" title="Favorites">
-        {starred.length ? (
-          <ul className="flex flex-col gap-6">
-            {starred.map(({ catId, cmd }) => (
-              <CommandRow
-                key={`${catId}/${cmd.id}`}
-                catId={catId}
-                cmd={cmd}
-                action={
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label={`Remove ${cmd.name} from favorites`}
-                    title="Remove from favorites"
-                    onClick={() =>
-                      setFavorites(
-                        favorites.filter((k) => k !== `${catId}/${cmd.id}`)
-                      )
-                    }
-                  >
-                    <StarIcon weight="fill" className="text-tok-var" />
-                  </Button>
-                }
-              />
-            ))}
-          </ul>
-        ) : (
-          <Empty>
-            No favorites yet. Open any command and press Favorite to keep it
-            here, with the values you last used.
-          </Empty>
-        )}
+        <Favorites />
+      </Section>
+
+      <Section id="recommended" title="Recommended">
+        <Recommended />
       </Section>
 
       <Section id="presets" title="Presets">
