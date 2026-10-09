@@ -1,0 +1,338 @@
+import type { Category } from "../lib/types.ts"
+import type { VarDef } from "../lib/template.ts"
+
+const host: VarDef = { default: "localhost", hint: "The database server." }
+const database: VarDef = { default: "app", hint: "The database name." }
+
+const databases: Category = {
+  id: "databases",
+  title: "Databases",
+  summary: "PostgreSQL, MySQL, SQLite, Redis and MongoDB from the command line.",
+  intro:
+    "Connecting, backing up, restoring, and the handful of SQL statements you need when setting up or debugging a database. SQL commands are quoted by SQL rules, so a quote inside a value is doubled, not escaped for the shell.",
+  commands: [
+    {
+      id: "psql",
+      name: "psql",
+      summary: "Connect to a PostgreSQL database.",
+      template: "psql -h {{host}} -p {{port}} -U {{user}} -d {{database}} {{command}}",
+      vars: {
+        host,
+        port: { default: "5432", hint: "PostgreSQL listens on 5432 by default." },
+        user: { default: "postgres", hint: "The database role to log in as." },
+        database,
+        command: { label: "SQL", optional: true, format: "-c {}", quote: "always", placeholder: "SELECT now();", hint: "Run one statement and exit, instead of opening a prompt." },
+      },
+      flags: [
+        ["-h, -p, -U, -d", "Host, port, user and database."],
+        ["-c <sql>", "Run one command and exit."],
+        ["-f <file>", "Run the statements in a file."],
+        ["-X", "Do not read your `~/.psqlrc`. Use it in scripts."],
+        ["-At", "Unaligned, tuples only: plain values for use in scripts."],
+        ["--csv", "Print results as CSV."],
+        ["-v ON_ERROR_STOP=1", "Stop a script at the first error."],
+      ],
+      examples: [
+        ["Connect with a URL", "psql 'postgresql://app:secret@db.example.com:5432/app?sslmode=require'"],
+        ["Run a schema file and stop on the first error", "psql -d app -v ON_ERROR_STOP=1 -f schema.sql"],
+        ["Export a query as CSV", "psql -d app --csv -c 'SELECT id, email FROM users' > users.csv"],
+      ],
+      notes: [
+        "Inside the prompt: `\\l` lists databases, `\\c name` switches, `\\dt` lists tables, `\\d table` describes one, `\\du` lists roles, `\\x` toggles wide rows, `\\q` quits.",
+        "Keep passwords out of the command line. Use a `~/.pgpass` file, or set `PGPASSWORD` for one command.",
+      ],
+      trouble: [
+        ["connection refused", "The server is not running, or does not listen on that address. Check `listen_addresses` in `postgresql.conf` and that the port is open."],
+        ["FATAL: password authentication failed", "Wrong password or role. If the password is right, the matching line in `pg_hba.conf` may demand another method."],
+        ["FATAL: no pg_hba.conf entry for host", "The server has no rule that allows your address, user and database. Add one to `pg_hba.conf` and reload."],
+      ],
+      tags: ["postgres", "postgresql", "connect", "sql prompt"],
+    },
+    {
+      id: "pg-dump",
+      name: "pg_dump",
+      summary: "Back up one PostgreSQL database to a file.",
+      template: "pg_dump -h {{host}} -U {{user}} -d {{database}} {{format}} -f {{file}}",
+      vars: {
+        host,
+        user: { default: "postgres", hint: "A role that may read everything in the database." },
+        database,
+        format: { options: ["-Fc", "-Fp", "-Fd"], hint: "c is compressed and restores selectively. p is plain SQL. d is a directory, for parallel dumps." },
+        file: { default: "app.dump", hint: "The file, or with -Fd the directory, to write." },
+      },
+      flags: [
+        ["-Fc", "Custom format: compressed, and `pg_restore` can pick single tables from it."],
+        ["-Fp", "Plain SQL text, restored with `psql`."],
+        ["-s", "Schema only, no data."],
+        ["-a", "Data only, no schema."],
+        ["-t <table>", "Dump only this table."],
+        ["-j <jobs>", "Dump in parallel. Needs `-Fd`."],
+        ["--no-owner", "Leave out ownership, to restore under another role."],
+      ],
+      examples: [
+        ["Plain SQL, compressed on the way out", "pg_dump -d app | gzip > app.sql.gz"],
+        ["Only the structure", "pg_dump -d app -s -f schema.sql"],
+        ["Every database and all roles", "pg_dumpall -U postgres -f cluster.sql"],
+      ],
+      notes: ["A dump is a consistent snapshot, even while the database is in use."],
+      tags: ["postgres", "backup", "export", "dump"],
+    },
+    {
+      id: "pg-restore",
+      name: "pg_restore",
+      summary: "Restore a PostgreSQL dump made in custom or directory format.",
+      template: "pg_restore -h {{host}} -U {{user}} -d {{database}} {{clean}} {{jobs}} {{file}}",
+      vars: {
+        host,
+        user: { default: "postgres", hint: "A role that may create the objects." },
+        database: { default: "app", hint: "An existing database to restore into." },
+        file: { default: "app.dump", hint: "The dump to read." },
+        jobs: { optional: true, format: "-j {}", placeholder: "4", hint: "Restore with this many parallel jobs." },
+        clean: { toggle: true, format: "--clean --if-exists", label: "Replace existing", hint: "Drop each object before recreating it." },
+      },
+      warn: "--clean drops the existing tables before it restores them. Whatever was added since the dump is gone. Restore into a fresh database when you can.",
+      flags: [
+        ["-d <database>", "The database to restore into. It must exist."],
+        ["--clean --if-exists", "Drop objects first, without errors for missing ones."],
+        ["-j <jobs>", "Number of parallel jobs."],
+        ["-t <table>", "Restore only this table."],
+        ["--no-owner", "Do not try to set the original owners."],
+        ["-l", "List the contents of the dump."],
+      ],
+      examples: [
+        ["Into a new, empty database", "createdb -U postgres app_restored\npg_restore -U postgres -d app_restored -j 4 app.dump"],
+        ["A plain SQL dump is restored with psql", "gunzip -c app.sql.gz | psql -d app"],
+      ],
+      tags: ["postgres", "restore", "import"],
+    },
+    {
+      id: "pg-create",
+      name: "PostgreSQL: database and user",
+      summary: "Create a database and a role that owns it.",
+      lang: "sql",
+      template: [
+        "CREATE USER {{user}} WITH PASSWORD '{{password}}';",
+        "CREATE DATABASE {{database}} OWNER {{user}};",
+        "GRANT ALL PRIVILEGES ON DATABASE {{database}} TO {{user}};",
+      ],
+      vars: {
+        database,
+        user: { default: "app_user", hint: "The role your application logs in as." },
+        password: { default: "change-me", hint: "Use a long random value. Quotes inside it are doubled for you." },
+      },
+      examples: [
+        ["A read-only role for reporting", "CREATE USER report WITH PASSWORD 'change-me';\nGRANT CONNECT ON DATABASE app TO report;\nGRANT USAGE ON SCHEMA public TO report;\nGRANT SELECT ON ALL TABLES IN SCHEMA public TO report;\nALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO report;"],
+        ["Change a password", "ALTER USER app_user WITH PASSWORD 'new-password';"],
+      ],
+      notes: [
+        "Run these as a superuser, for example in `psql -U postgres`.",
+        "Since PostgreSQL 15 a role that does not own the database cannot create tables in `public`. Make it the owner as above, or run `GRANT ALL ON SCHEMA public TO app_user;` inside that database.",
+      ],
+      tags: ["postgres", "create database", "create user", "grant", "role"],
+    },
+    {
+      id: "pg-activity",
+      name: "PostgreSQL: running queries",
+      summary: "See what the server is doing right now, longest running first.",
+      lang: "sql",
+      template: [
+        "SELECT pid, now() - query_start AS runtime, state, left(query, 80) AS query",
+        "FROM pg_stat_activity",
+        "WHERE state <> 'idle' AND now() - query_start > interval '{{seconds}} seconds'",
+        "ORDER BY runtime DESC;",
+      ],
+      vars: {
+        seconds: { default: "5", hint: "Only show queries that have been running longer than this." },
+      },
+      examples: [
+        ["Ask a query to stop", "SELECT pg_cancel_backend(12345);"],
+        ["Close the connection if it does not", "SELECT pg_terminate_backend(12345);"],
+        ["The ten largest tables, with their indexes", "SELECT relname, pg_size_pretty(pg_total_relation_size(relid)) AS size\nFROM pg_catalog.pg_statio_user_tables\nORDER BY pg_total_relation_size(relid) DESC\nLIMIT 10;"],
+      ],
+      tags: ["postgres", "slow query", "locks", "kill query", "table size"],
+    },
+    {
+      id: "explain",
+      name: "EXPLAIN ANALYZE",
+      summary: "Run a query and show how the database executed it.",
+      lang: "sql",
+      template: "EXPLAIN (ANALYZE, BUFFERS) {{query}};",
+      vars: {
+        query: { default: "SELECT * FROM users WHERE email = 'ada@example.com'", hint: "The statement to examine, without the final semicolon." },
+      },
+      warn: "ANALYZE really executes the statement. For an UPDATE or DELETE, wrap it in BEGIN and ROLLBACK so nothing is changed.",
+      notes: [
+        "A `Seq Scan` on a large table with a selective filter usually means a missing index.",
+        "Compare the estimated `rows` with the actual ones. A big gap means stale statistics: run `ANALYZE table_name;`.",
+      ],
+      examples: [["Examine a write without keeping its effect", "BEGIN;\nEXPLAIN (ANALYZE, BUFFERS) DELETE FROM sessions WHERE expires_at < now();\nROLLBACK;"]],
+      tags: ["postgres", "query plan", "slow query", "performance", "index"],
+    },
+    {
+      id: "create-index",
+      name: "CREATE INDEX",
+      summary: "Add an index to speed up lookups on a column.",
+      lang: "sql",
+      template: "CREATE INDEX {{concurrently}} {{name}} ON {{table}} ({{columns}});",
+      vars: {
+        name: { default: "idx_users_email", hint: "A name for the index." },
+        table: { default: "users", hint: "The table to index." },
+        columns: { default: "email", hint: "One column, or several separated by commas." },
+        concurrently: { toggle: true, format: "CONCURRENTLY", label: "Without locking", hint: "PostgreSQL only. Builds the index without blocking writes." },
+      },
+      examples: [
+        ["Only one row per value", "CREATE UNIQUE INDEX idx_users_email ON users (email);"],
+        ["Index only the rows you query", "CREATE INDEX idx_orders_open ON orders (created_at) WHERE status = 'open';"],
+      ],
+      notes: [
+        "`CONCURRENTLY` cannot run inside a transaction, and takes longer. On a busy production table it is the safe choice.",
+        "Every index slows down writes a little. Add them for queries you have measured.",
+      ],
+      tags: ["index", "performance", "postgres", "mysql"],
+    },
+    {
+      id: "mysql",
+      name: "mysql",
+      summary: "Connect to a MySQL or MariaDB server.",
+      template: "mysql -h {{host}} -P {{port}} -u {{user}} -p {{database}}",
+      vars: {
+        host,
+        port: { default: "3306", hint: "MySQL listens on 3306 by default." },
+        user: { default: "root", hint: "The account to log in as." },
+        database: { optional: true, default: "app", hint: "The database to select after connecting." },
+      },
+      flags: [
+        ["-h, -P, -u", "Host, port and user. Note the capital P for the port."],
+        ["-p", "Ask for the password. Do not write it on the command line."],
+        ["-e <sql>", "Run a statement and exit."],
+        ["-N -B", "No column names, tab-separated: output for scripts."],
+      ],
+      examples: [
+        ["Run one statement", "mysql -u root -p -e 'SHOW DATABASES;'"],
+        ["Run a SQL file", "mysql -u root -p app < schema.sql"],
+      ],
+      notes: ["Inside the prompt: `SHOW DATABASES;`, `USE app;`, `SHOW TABLES;`, `DESCRIBE users;`, and `\\G` instead of `;` for vertical output."],
+      trouble: [
+        ["ERROR 1045: Access denied for user", "Wrong password, or the account is defined for another host. An account `'app'@'localhost'` does not match connections from other machines."],
+        ["ERROR 2002: Can't connect to local MySQL server through socket", "The server is not running, or you meant a TCP connection. Use `-h 127.0.0.1` to avoid the socket."],
+      ],
+      tags: ["mysql", "mariadb", "connect"],
+    },
+    {
+      id: "mysqldump",
+      name: "mysqldump",
+      summary: "Back up a MySQL database to a SQL file.",
+      template: "mysqldump -h {{host}} -u {{user}} -p {{consistent}} {{database}} > {{file}}",
+      vars: {
+        host,
+        user: { default: "root", hint: "An account that may read the database." },
+        database,
+        file: { default: "app.sql", hint: "The SQL file to write." },
+        consistent: { toggle: true, format: "--single-transaction", default: "1", label: "Consistent snapshot", hint: "Dump InnoDB tables without locking them." },
+      },
+      flags: [
+        ["--single-transaction", "A consistent dump of InnoDB tables without blocking writers."],
+        ["--routines --triggers", "Include stored procedures and triggers."],
+        ["--no-data", "Schema only."],
+        ["--all-databases", "Dump every database."],
+      ],
+      examples: [
+        ["Restore the dump", "mysql -u root -p app < app.sql"],
+        ["Compressed", "mysqldump -u root -p --single-transaction app | gzip > app.sql.gz"],
+      ],
+      tags: ["mysql", "backup", "export", "dump"],
+    },
+    {
+      id: "mysql-create",
+      name: "MySQL: database and user",
+      summary: "Create a database and an account that may use it.",
+      lang: "sql",
+      template: [
+        "CREATE DATABASE {{database}} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
+        "CREATE USER '{{user}}'@'{{from}}' IDENTIFIED BY '{{password}}';",
+        "GRANT ALL PRIVILEGES ON {{database}}.* TO '{{user}}'@'{{from}}';",
+        "FLUSH PRIVILEGES;",
+      ],
+      vars: {
+        database,
+        user: { default: "app_user", hint: "The account your application logs in as." },
+        from: { label: "Allowed from", default: "%", hint: "% is any host. Use localhost or an address to restrict it." },
+        password: { default: "change-me", hint: "Use a long random value." },
+      },
+      examples: [["See what an account may do", "SHOW GRANTS FOR 'app_user'@'%';"]],
+      tags: ["mysql", "create database", "create user", "grant"],
+    },
+    {
+      id: "sqlite3",
+      name: "sqlite3",
+      summary: "Open an SQLite database file, or run one command on it.",
+      template: "sqlite3 {{file}} {{command}}",
+      vars: {
+        file: { default: "app.db", hint: "The database file. It is created if it does not exist." },
+        command: { optional: true, quote: "always", default: ".tables", hint: "A SQL statement or a dot command. Empty opens the prompt." },
+      },
+      flags: [
+        [".tables", "List the tables."],
+        [".schema <table>", "Show the CREATE statements."],
+        [".mode column, .headers on", "Readable output with column names."],
+        [".dump", "Print the whole database as SQL."],
+        [".backup <file>", "Write a consistent copy, safe while the database is in use."],
+        ["-csv, -header", "Options for CSV output with a header row."],
+      ],
+      examples: [
+        ["Export a query to CSV", "sqlite3 -header -csv app.db 'SELECT * FROM users;' > users.csv"],
+        ["A safe copy of a live database", "sqlite3 app.db \".backup 'backup.db'\""],
+        ["Dump to SQL and load it elsewhere", "sqlite3 app.db .dump > dump.sql\nsqlite3 new.db < dump.sql"],
+      ],
+      tags: ["sqlite", "embedded", "file database"],
+    },
+    {
+      id: "redis-cli",
+      name: "redis-cli",
+      summary: "Talk to a Redis server.",
+      template: "redis-cli -h {{host}} -p {{port}} {{command}}",
+      vars: {
+        host,
+        port: { default: "6379", hint: "Redis listens on 6379 by default." },
+        command: { optional: true, quote: "raw", default: "PING", hint: "A Redis command with its arguments. Empty opens the prompt." },
+      },
+      warn: "FLUSHALL and FLUSHDB delete every key at once. KEYS * on a large production instance blocks the server while it runs. Use --scan to iterate safely.",
+      flags: [
+        ["-a <password>", "Authenticate. Prefer the `REDISCLI_AUTH` environment variable, which stays out of your history."],
+        ["-n <db>", "Select a database number."],
+        ["--scan --pattern <glob>", "List matching keys without blocking the server."],
+        ["--bigkeys", "Sample the keyspace for the largest keys."],
+        ["-u <url>", "Connect with a `redis://` URL."],
+      ],
+      examples: [
+        ["Find keys safely", "redis-cli --scan --pattern 'session:*' | head"],
+        ["Memory and client statistics", "redis-cli INFO memory"],
+        ["Watch every command the server receives", "redis-cli MONITOR"],
+      ],
+      tags: ["redis", "cache", "key value"],
+    },
+    {
+      id: "mongosh",
+      name: "mongosh",
+      summary: "Connect to a MongoDB deployment.",
+      template: "mongosh {{uri}} {{eval}}",
+      vars: {
+        uri: { label: "Connection string", default: "mongodb://localhost:27017/app", quote: "always", hint: "Quoted, because connection strings often contain & and ?." },
+        eval: { label: "Run", optional: true, format: "--eval {}", quote: "always", placeholder: "db.users.countDocuments()", hint: "Run this JavaScript and exit." },
+      },
+      flags: [
+        ["--eval <js>", "Run an expression and exit."],
+        ["--quiet", "Leave out the connection banner."],
+        ["-u, -p", "User name and password. With `-p` alone it asks."],
+      ],
+      examples: [
+        ["Back up a database", "mongodump --uri='mongodb://localhost:27017/app' --out=dump/"],
+        ["Restore it", "mongorestore --uri='mongodb://localhost:27017' dump/"],
+      ],
+      notes: ["Inside the shell: `show dbs`, `use app`, `show collections`, `db.users.find().limit(5)`."],
+      tags: ["mongodb", "mongo", "nosql"],
+    },
+  ],
+}
+
+export default databases

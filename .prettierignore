@@ -5,3 +5,6 @@ pnpm-lock.yaml
 package-lock.json
 pnpm-lock.yaml
 yarn.lock
+
+# Content tables are laid out by hand, one entry per line.
+src/data/

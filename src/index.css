@@ -2,12 +2,18 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/raleway";
+@import "@fontsource-variable/jetbrains-mono";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
     --font-heading: var(--font-sans);
     --font-sans: 'Raleway Variable', sans-serif;
+    --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    --color-link: var(--link);
+    --color-tok-str: var(--tok-str);
+    --color-tok-var: var(--tok-var);
+    --color-term: var(--term);
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -60,7 +66,7 @@
     --secondary: oklch(0.967 0.001 286.375);
     --secondary-foreground: oklch(0.21 0.006 285.885);
     --muted: oklch(0.963 0.002 197.1);
-    --muted-foreground: oklch(0.56 0.021 213.5);
+    --muted-foreground: oklch(0.5 0.021 213.5);
     --accent: oklch(0.963 0.002 197.1);
     --accent-foreground: oklch(0.218 0.008 223.9);
     --destructive: oklch(0.577 0.245 27.325);
@@ -81,9 +87,18 @@
     --sidebar-accent-foreground: oklch(0.218 0.008 223.9);
     --sidebar-border: oklch(0.925 0.005 214.3);
     --sidebar-ring: oklch(0.723 0.014 214.4);
+    /* Zenbook: accent text, syntax colours, and the terminal surface */
+    --link: oklch(0.5 0.134 242.749);
+    --tok-str: oklch(0.508 0.118 165.612);
+    --tok-var: oklch(0.555 0.163 48.998);
+    --term: oklch(0.185 0.006 225);
 }
 
 .dark {
+    color-scheme: dark;
+    --link: oklch(0.746 0.16 232.661);
+    --tok-str: oklch(0.845 0.143 164.978);
+    --tok-var: oklch(0.879 0.169 91.605);
     --background: oklch(0.148 0.004 228.8);
     --foreground: oklch(0.987 0.002 197.1);
     --card: oklch(0.218 0.008 223.9);
@@ -129,5 +144,37 @@
     }
   html {
     @apply font-sans;
+    /* Raleway is light at 400 and defaults to old-style figures, which read badly in ports and versions. */
+    font-weight: 500;
+    font-feature-settings: "lnum";
+    scroll-padding-top: 5rem;
+    scrollbar-gutter: stable;
+    /* Quiet scrollbars that follow the theme. */
+    scrollbar-color: color-mix(in oklch, var(--muted-foreground) 45%, transparent) transparent;
     }
+  /* A modal dialog should not let the page behind it scroll. */
+  html:has(dialog:modal) {
+    overflow: hidden;
+    }
+  h1, h2, h3 {
+    letter-spacing: -0.012em;
+    }
+  /* Commands must show the exact characters to type: no "--" or "!=" ligatures. */
+  code, pre, kbd, samp, .font-mono {
+    font-variant-ligatures: none;
+    font-feature-settings: normal;
+    }
+  code, pre, kbd, samp {
+    font-weight: 400;
+    }
+  ::selection {
+    background-color: color-mix(in oklch, var(--link) 25%, transparent);
+    }
+}
+/* Mono for interface labels (buttons, navigation). Code keeps its exact spacing; labels read better tighter. */
+@utility label-mono {
+  font-family: var(--font-mono);
+  font-variant-ligatures: none;
+  font-feature-settings: normal;
+  word-spacing: -0.22em;
 }

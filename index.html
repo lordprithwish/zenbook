@@ -2,12 +2,32 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>vite-app</title>
+    <meta
+      name="description"
+      content="Zenbook is a static reference library for developers: documentation, cheatsheets and commands with editable variables. Find it. Understand it. Customize it. Copy it."
+    />
+    <meta name="color-scheme" content="light dark" />
+    <title>Zenbook - developer knowledge base</title>
+    <script>
+      // Apply the saved or system theme before first paint, so dark mode does not flash white.
+      try {
+        var saved = localStorage.getItem("theme")
+        var dark =
+          saved === "dark" ||
+          (saved !== "light" &&
+            matchMedia("(prefers-color-scheme: dark)").matches)
+        document.documentElement.classList.add(dark ? "dark" : "light")
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript
+      >Zenbook needs JavaScript to build commands and search the
+      library.</noscript
+    >
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
