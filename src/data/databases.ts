@@ -47,6 +47,7 @@ const databases: Category = {
         ["FATAL: no pg_hba.conf entry for host", "The server has no rule that allows your address, user and database. Add one to `pg_hba.conf` and reload."],
       ],
       tags: ["postgres", "postgresql", "connect", "sql prompt"],
+      related: ["pg-dump", "pg-create", "pg-activity", "cheatsheets/postgres"],
     },
     {
       id: "pg-dump",
@@ -76,6 +77,7 @@ const databases: Category = {
       ],
       notes: ["A dump is a consistent snapshot, even while the database is in use."],
       tags: ["postgres", "backup", "export", "dump"],
+      related: ["pg-restore", "psql"],
     },
     {
       id: "pg-restore",
@@ -104,6 +106,7 @@ const databases: Category = {
         ["A plain SQL dump is restored with psql", "gunzip -c app.sql.gz | psql -d app"],
       ],
       tags: ["postgres", "restore", "import"],
+      related: ["pg-dump", "psql"],
     },
     {
       id: "pg-create",
@@ -129,6 +132,7 @@ const databases: Category = {
         "Since PostgreSQL 15 a role that does not own the database cannot create tables in `public`. Make it the owner as above, or run `GRANT ALL ON SCHEMA public TO app_user;` inside that database.",
       ],
       tags: ["postgres", "create database", "create user", "grant", "role"],
+      related: ["psql"],
     },
     {
       id: "pg-activity",
@@ -150,6 +154,7 @@ const databases: Category = {
         ["The ten largest tables, with their indexes", "SELECT relname, pg_size_pretty(pg_total_relation_size(relid)) AS size\nFROM pg_catalog.pg_statio_user_tables\nORDER BY pg_total_relation_size(relid) DESC\nLIMIT 10;"],
       ],
       tags: ["postgres", "slow query", "locks", "kill query", "table size"],
+      related: ["explain", "psql"],
     },
     {
       id: "explain",
@@ -167,6 +172,7 @@ const databases: Category = {
       ],
       examples: [["Examine a write without keeping its effect", "BEGIN;\nEXPLAIN (ANALYZE, BUFFERS) DELETE FROM sessions WHERE expires_at < now();\nROLLBACK;"]],
       tags: ["postgres", "query plan", "slow query", "performance", "index"],
+      related: ["create-index", "pg-activity"],
     },
     {
       id: "create-index",
@@ -189,6 +195,7 @@ const databases: Category = {
         "Every index slows down writes a little. Add them for queries you have measured.",
       ],
       tags: ["index", "performance", "postgres", "mysql"],
+      related: ["explain"],
     },
     {
       id: "mysql",
@@ -217,6 +224,7 @@ const databases: Category = {
         ["ERROR 2002: Can't connect to local MySQL server through socket", "The server is not running, or you meant a TCP connection. Use `-h 127.0.0.1` to avoid the socket."],
       ],
       tags: ["mysql", "mariadb", "connect"],
+      related: ["mysqldump", "mysql-create"],
     },
     {
       id: "mysqldump",
@@ -241,6 +249,7 @@ const databases: Category = {
         ["Compressed", "mysqldump -u root -p --single-transaction app | gzip > app.sql.gz"],
       ],
       tags: ["mysql", "backup", "export", "dump"],
+      related: ["mysql"],
     },
     {
       id: "mysql-create",
@@ -261,6 +270,7 @@ const databases: Category = {
       },
       examples: [["See what an account may do", "SHOW GRANTS FOR 'app_user'@'%';"]],
       tags: ["mysql", "create database", "create user", "grant"],
+      related: ["mysql"],
     },
     {
       id: "sqlite3",
@@ -285,6 +295,7 @@ const databases: Category = {
         ["Dump to SQL and load it elsewhere", "sqlite3 app.db .dump > dump.sql\nsqlite3 new.db < dump.sql"],
       ],
       tags: ["sqlite", "embedded", "file database"],
+      related: ["psql", "mysql"],
     },
     {
       id: "redis-cli",
@@ -310,6 +321,7 @@ const databases: Category = {
         ["Watch every command the server receives", "redis-cli MONITOR"],
       ],
       tags: ["redis", "cache", "key value"],
+      related: ["mongosh"],
     },
     {
       id: "mongosh",
@@ -331,6 +343,7 @@ const databases: Category = {
       ],
       notes: ["Inside the shell: `show dbs`, `use app`, `show collections`, `db.users.find().limit(5)`."],
       tags: ["mongodb", "mongo", "nosql"],
+      related: ["redis-cli"],
     },
   ],
 }

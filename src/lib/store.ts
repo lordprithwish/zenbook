@@ -97,5 +97,41 @@ export const usePresets = () =>
 export const useTemplates = () =>
   useStored<UserTemplate[]>("zb:templates", NONE, isTemplates)
 
+/** Whether a key is a favorite, and a function to flip it. New favorites go to the end. */
+export function useFavorite(key: string) {
+  const [favorites, setFavorites] = useFavorites()
+  const on = favorites.includes(key)
+  const toggle = () =>
+    setFavorites(on ? favorites.filter((k) => k !== key) : [...favorites, key])
+  return [on, toggle] as const
+}
+
+export type FavoritesView = "grouped" | "flat"
+const isView = (v: unknown) => v === "grouped" || v === "flat"
+export const useFavoritesView = () =>
+  useStored<FavoritesView>("zb:favorites-view", "grouped", isView)
+
+/** Commands and sheets opened lately, most recent first. */
+export const useRecent = () =>
+  useStored<string[]>("zb:recent", NONE, isFavorites)
+
+const RECENT_MAX = 12
+
+/** Put `key` at the front of the recent list. */
+export function remember(key: string) {
+  let list: unknown = null
+  try {
+    list = JSON.parse(read("zb:recent") ?? "[]")
+  } catch {
+    // Unreadable history starts over.
+  }
+  const prev = isFavorites(list) ? (list as string[]) : []
+  if (prev[0] === key) return
+  write(
+    "zb:recent",
+    JSON.stringify([key, ...prev.filter((k) => k !== key)].slice(0, RECENT_MAX))
+  )
+}
+
 export const newId = () =>
   Date.now().toString(36) + Math.random().toString(36).slice(2, 6)

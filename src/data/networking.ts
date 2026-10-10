@@ -48,6 +48,7 @@ const networking: Category = {
         ["curl: (60) SSL certificate problem", "The certificate is expired, self-signed, or issued for another name. Fix the certificate. `-k` skips the check and should stay in local testing."],
       ],
       tags: ["http", "request", "api", "download", "post", "rest"],
+      related: ["wget", "dig", "tls-check", "tools/jq"],
     },
     {
       id: "wget",
@@ -68,6 +69,7 @@ const networking: Category = {
       ],
       examples: [["Print a page to the terminal", "wget -qO- https://example.com"]],
       tags: ["download", "fetch"],
+      related: ["curl", "linux/tar-extract"],
     },
     {
       id: "ping",
@@ -85,6 +87,7 @@ const networking: Category = {
       ],
       notes: ["No reply does not prove the host is down. Many networks block ICMP while the service itself is reachable."],
       tags: ["reachable", "latency", "icmp"],
+      related: ["traceroute", "dig", "ip"],
     },
     {
       id: "traceroute",
@@ -102,6 +105,7 @@ const networking: Category = {
       examples: [["A continuously updated view of loss per hop", "mtr -rw example.com"]],
       notes: ["Rows of stars in the middle are routers that do not answer probes. They only matter if every later hop is silent as well."],
       tags: ["route", "hops", "mtr", "path"],
+      related: ["ping", "dig"],
     },
     {
       id: "dig",
@@ -128,6 +132,7 @@ const networking: Category = {
       ],
       notes: ["A record that differs between resolvers is still spreading. How long that takes depends on the old TTL."],
       tags: ["dns", "lookup", "nslookup", "records", "domain"],
+      related: ["ping", "curl", "cheatsheets/network-debug"],
     },
     {
       id: "ss",
@@ -151,6 +156,7 @@ const networking: Category = {
       ],
       notes: ["A service listening on `127.0.0.1` only accepts local connections. For remote access it must listen on `0.0.0.0` or the public address."],
       tags: ["ports", "listening", "netstat", "sockets", "lsof"],
+      related: ["nc", "linux/ps", "ufw"],
     },
     {
       id: "ip",
@@ -173,6 +179,7 @@ const networking: Category = {
         ["Bring an interface up", "sudo ip link set eth0 up"],
       ],
       tags: ["ip address", "interface", "route", "ifconfig"],
+      related: ["ping", "ss"],
     },
     {
       id: "nc",
@@ -196,6 +203,7 @@ const networking: Category = {
         ["Talk to a service by hand", "printf 'GET / HTTP/1.0\\r\\n\\r\\n' | nc example.com 80"],
       ],
       tags: ["netcat", "port check", "tcp", "open port"],
+      related: ["ss", "nmap", "curl"],
     },
     {
       id: "nmap",
@@ -218,6 +226,7 @@ const networking: Category = {
       ],
       examples: [["Which devices are on my network", "nmap -sn 192.168.1.0/24"]],
       tags: ["port scan", "open ports", "discovery", "security"],
+      related: ["nc", "ss", "ufw"],
     },
     {
       id: "tcpdump",
@@ -243,6 +252,7 @@ const networking: Category = {
         ["Save a capture to open in Wireshark", "sudo tcpdump -i eth0 -w capture.pcap port 80"],
       ],
       tags: ["packets", "capture", "sniff", "wireshark"],
+      related: ["ss", "curl"],
     },
     {
       id: "tls-check",
@@ -263,6 +273,7 @@ const networking: Category = {
       ],
       examples: [["How many days until a certificate expires", "echo | openssl s_client -connect example.com:443 -servername example.com 2>/dev/null | openssl x509 -noout -enddate"]],
       tags: ["tls", "ssl", "certificate", "expiry", "https"],
+      related: ["curl", "tools/openssl-cert"],
     },
     {
       id: "ufw",
@@ -286,6 +297,7 @@ const networking: Category = {
         ["Let one network reach the database", "sudo ufw allow from 203.0.113.0/24 to any port 5432 proto tcp"],
       ],
       tags: ["firewall", "iptables", "open port", "block"],
+      related: ["ss", "nmap"],
     },
   ],
 }

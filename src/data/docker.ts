@@ -52,6 +52,7 @@ const docker: Category = {
         ["The container exits immediately", "Its main process ended. Read why with `docker logs <name>`."],
       ],
       tags: ["start", "container", "port", "volume"],
+      related: ["ps", "logs", "exec", "stop", "cheatsheets/docker"],
     },
     {
       id: "ps",
@@ -74,6 +75,7 @@ const docker: Category = {
         ["Live CPU and memory use", "docker stats --no-stream"],
       ],
       tags: ["list containers", "running"],
+      related: ["logs", "exec", "stop", "inspect"],
     },
     {
       id: "build",
@@ -105,6 +107,7 @@ const docker: Category = {
       ],
       trouble: [["COPY failed: file not found in build context", "Paths in `COPY` are relative to the context directory, and files matched by `.dockerignore` are not there."]],
       tags: ["image", "dockerfile", "buildx"],
+      related: ["run", "images", "push"],
     },
     {
       id: "images",
@@ -125,6 +128,7 @@ const docker: Category = {
         ["Remove images that nothing uses", "docker image prune -a"],
       ],
       tags: ["list images", "rmi"],
+      related: ["build", "pull", "system-prune"],
     },
     {
       id: "pull",
@@ -141,6 +145,7 @@ const docker: Category = {
       ],
       notes: ["`latest` is only a tag name. Pin a version such as `nginx:1.27-alpine` for builds you can repeat."],
       tags: ["download image", "registry"],
+      related: ["run", "images"],
     },
     {
       id: "push",
@@ -159,6 +164,7 @@ const docker: Category = {
         ["denied: requested access to the resource is denied", "You are not logged in to that registry, or the name does not start with a namespace you may push to. Run `docker login` and check the tag."],
       ],
       tags: ["upload image", "registry", "tag", "publish"],
+      related: ["build", "images"],
     },
     {
       id: "exec",
@@ -182,6 +188,7 @@ const docker: Category = {
       ],
       trouble: [["exec: \"bash\": executable file not found", "Small images such as Alpine have no bash. Use `sh`."]],
       tags: ["shell", "enter container", "attach"],
+      related: ["ps", "logs", "cp"],
     },
     {
       id: "logs",
@@ -202,6 +209,7 @@ const docker: Category = {
       ],
       examples: [["Search the logs, including error output", "docker logs web 2>&1 | grep -i error"]],
       tags: ["output", "debug"],
+      related: ["ps", "exec", "linux/tail"],
     },
     {
       id: "stop",
@@ -219,6 +227,7 @@ const docker: Category = {
       ],
       examples: [["Stop every running container", "docker stop $(docker ps -q)"]],
       tags: ["start", "restart", "kill container"],
+      related: ["rm", "ps", "run"],
     },
     {
       id: "rm",
@@ -237,6 +246,7 @@ const docker: Category = {
       ],
       examples: [["Remove all stopped containers", "docker container prune"]],
       tags: ["delete container", "remove"],
+      related: ["stop", "ps", "system-prune"],
     },
     {
       id: "inspect",
@@ -254,6 +264,7 @@ const docker: Category = {
         ["Why a container stopped", "docker inspect -f '{{.State.ExitCode}} {{.State.Error}}' web"],
       ],
       tags: ["details", "ip address", "json"],
+      related: ["ps", "network", "volume"],
     },
     {
       id: "cp",
@@ -266,6 +277,7 @@ const docker: Category = {
       },
       examples: [["Copy a file into a container", "docker cp ./nginx.conf web:/etc/nginx/nginx.conf"]],
       tags: ["copy files", "extract"],
+      related: ["exec", "volume"],
     },
     {
       id: "compose-up",
@@ -292,6 +304,7 @@ const docker: Category = {
         ["What is running", "docker compose ps"],
       ],
       tags: ["compose", "start stack", "services"],
+      related: ["compose-down", "logs", "ps"],
     },
     {
       id: "compose-down",
@@ -310,6 +323,7 @@ const docker: Category = {
       ],
       examples: [["Stop without removing anything", "docker compose stop"]],
       tags: ["compose", "stop stack", "teardown"],
+      related: ["compose-up", "volume"],
     },
     {
       id: "volume",
@@ -330,6 +344,7 @@ const docker: Category = {
         ["Restore that backup into a volume", "docker run --rm -v pgdata:/data -v \"$PWD\":/backup alpine tar -xzf /backup/pgdata.tar.gz -C /data"],
       ],
       tags: ["data", "storage", "persist", "backup"],
+      related: ["rm", "inspect", "system-prune"],
     },
     {
       id: "network",
@@ -350,6 +365,7 @@ const docker: Category = {
       ],
       notes: ["On a user-defined network, containers resolve each other by container name. The default bridge network does not do that."],
       tags: ["dns", "connect containers", "bridge"],
+      related: ["inspect", "run", "networking/curl"],
     },
     {
       id: "system-prune",
@@ -373,6 +389,7 @@ const docker: Category = {
         ["Remove images unused for a week", "docker image prune -a --filter 'until=168h'"],
       ],
       tags: ["clean up", "disk space", "delete images"],
+      related: ["images", "volume", "linux/df"],
     },
   ],
 }

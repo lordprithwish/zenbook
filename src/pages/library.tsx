@@ -1,18 +1,18 @@
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
-  StarIcon,
   WarningIcon,
 } from "@phosphor-icons/react"
 import { Fragment, type ReactNode } from "react"
 
 import { CommandBuilder, useBuilder } from "@/components/builder"
 import { CodeBlock, CommandLine, CopyButton, Inline } from "@/components/code"
+import { FavoriteButton, ItemList } from "@/components/items"
 import { Page, Section, type TocItem } from "@/components/shell"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { categories } from "@/data"
+import { related } from "@/lib/catalog"
 import { href } from "@/lib/router"
-import { useFavorites } from "@/lib/store"
 import type { Category, Command } from "@/lib/types"
 
 export const commandCount = categories.reduce(
@@ -90,7 +90,14 @@ export function CategoryPage({ cat }: { cat: Category }) {
     <Page path={[[cat.id]]} title={cat.title} lead={cat.intro}>
       <ul className="flex flex-col gap-6">
         {cat.commands.map((cmd) => (
-          <CommandRow key={cmd.id} catId={cat.id} cmd={cmd} />
+          <CommandRow
+            key={cmd.id}
+            catId={cat.id}
+            cmd={cmd}
+            action={
+              <FavoriteButton itemKey={`${cat.id}/${cmd.id}`} name={cmd.name} />
+            }
+          />
         ))}
       </ul>
     </Page>
@@ -147,8 +154,7 @@ export function CommandPage({
   children?: ReactNode
 }) {
   const key = `${catId}/${cmd.id}`
-  const [favorites, setFavorites] = useFavorites()
-  const starred = favorites.includes(key)
+  const links = related(key)
   const at = list.findIndex((c) => c.id === cmd.id)
   const prev = list[at - 1]
   const next = list[at + 1]
@@ -172,6 +178,9 @@ export function CommandPage({
           },
         ]
       : []),
+    ...(links.length
+      ? [{ label: "Related", to: href(catId, cmd.id, "related") }]
+      : []),
   ]
 
   return (
@@ -180,25 +189,7 @@ export function CommandPage({
       title={<span className="font-mono">{cmd.name}</span>}
       lead={cmd.summary}
       toc={toc}
-      actions={
-        <Button
-          variant="outline"
-          size="sm"
-          className="label-mono text-xs"
-          aria-pressed={starred}
-          onClick={() =>
-            setFavorites(
-              starred ? favorites.filter((k) => k !== key) : [...favorites, key]
-            )
-          }
-        >
-          <StarIcon
-            weight={starred ? "fill" : "regular"}
-            className={starred ? "text-tok-var" : ""}
-          />
-          {starred ? "Favorited" : "Favorite"}
-        </Button>
-      }
+      actions={<FavoriteButton itemKey={key} name={cmd.name} full />}
     >
       <section
         id="command"
@@ -268,6 +259,16 @@ export function CommandPage({
               </div>
             ))}
           </dl>
+        </Section>
+      )}
+
+      {links.length > 0 && (
+        <Section id="related" title="Related">
+          <p className="-mt-2 text-sm text-muted-foreground">
+            Commands you are likely to need with{" "}
+            <span className="font-mono">{cmd.name}</span>.
+          </p>
+          <ItemList items={links} />
         </Section>
       )}
 

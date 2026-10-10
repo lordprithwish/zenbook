@@ -8,6 +8,48 @@ const linux: Category = {
     "The core command line tools found on nearly every Linux machine, and mostly on macOS too. They read text, write text, and combine with pipes, which is why a handful of them goes a long way.",
   commands: [
     {
+      id: "pwd",
+      name: "pwd",
+      summary: "Print the current working directory: where you are right now.",
+      template: "pwd {{physical}}",
+      vars: {
+        physical: { toggle: true, format: "-P", label: "Resolve symlinks", hint: "Show the real path instead of the path through a symbolic link." },
+      },
+      flags: [
+        ["-L", "Print the path as you reached it, symlinks included. The default."],
+        ["-P", "Print the physical path, with every symlink resolved."],
+      ],
+      examples: [
+        ["Copy the current path to the clipboard on macOS", "pwd | pbcopy"],
+        ["Move a file here from elsewhere", 'mv ~/Downloads/report.pdf "$(pwd)"'],
+      ],
+      notes: ["`$PWD` holds the same value, so `echo $PWD` works too and is handy inside scripts."],
+      tags: ["where am i", "current directory", "current location", "current folder", "path", "location"],
+      related: ["cd", "ls", "mv", "cp"],
+    },
+    {
+      id: "cd",
+      name: "cd",
+      summary: "Change the current directory.",
+      template: "cd {{path=~/projects}}",
+      vars: {
+        path: { hint: "Where to go. .. is one level up, - is the previous directory, ~ is home." },
+      },
+      examples: [
+        ["Go back to the previous directory", "cd -"],
+        ["Go home", "cd"],
+        ["One level up", "cd .."],
+        ["Make a directory and enter it", "mkdir -p app/src && cd app/src"],
+      ],
+      notes: [
+        "cd is built into the shell, so it changes the directory of the shell you type it in, not of a script that calls it.",
+        "Run `pwd` to confirm where you ended up.",
+      ],
+      trouble: [["`cd: no such file or directory`", "Check the path with `ls`. Quote names that contain spaces: `cd 'My Folder'`."]],
+      tags: ["change directory", "navigate", "go to", "folder", "move into"],
+      related: ["pwd", "ls", "mkdir"],
+    },
+    {
       id: "ls",
       name: "ls",
       summary: "List the contents of a directory.",
@@ -35,6 +77,7 @@ const linux: Category = {
         ["Only the directories", "ls -d */"],
       ],
       tags: ["list", "files", "directory", "dir"],
+      related: ["pwd", "cd", "du", "find", "tools/fd"],
     },
     {
       id: "cp",
@@ -62,6 +105,7 @@ const linux: Category = {
         ["Several files into a directory", "cp report.pdf notes.txt ~/Documents/"],
       ],
       tags: ["copy", "duplicate", "backup"],
+      related: ["pwd", "ls", "mv", "ssh/rsync", "ssh/scp"],
     },
     {
       id: "mv",
@@ -81,6 +125,7 @@ const linux: Category = {
       ],
       examples: [["Move several files into a directory", "mv *.log logs/"]],
       tags: ["rename", "move"],
+      related: ["pwd", "ls", "cp", "mkdir"],
     },
     {
       id: "rm",
@@ -107,6 +152,7 @@ const linux: Category = {
       ],
       notes: ["In scripts, write `rm -rf \"${DIR:?}/cache\"`. The `:?` makes the shell stop if the variable is empty, instead of deleting `/cache`."],
       tags: ["delete", "remove", "unlink"],
+      related: ["ls", "find", "mv", "git/clean"],
     },
     {
       id: "mkdir",
@@ -123,6 +169,7 @@ const linux: Category = {
       ],
       examples: [["Create a directory and move into it", "mkdir -p my-project && cd my-project"]],
       tags: ["create directory", "folder"],
+      related: ["cd", "pwd", "chmod"],
     },
     {
       id: "ln",
@@ -143,6 +190,7 @@ const linux: Category = {
       examples: [["See where a link points", "ls -l /opt/app/current\nreadlink -f /opt/app/current"]],
       notes: ["The order is the same as `cp`: the thing that exists comes first, the new name second."],
       tags: ["symlink", "link", "shortcut"],
+      related: ["ls", "pwd", "mv"],
     },
     {
       id: "find",
@@ -175,6 +223,7 @@ const linux: Category = {
       notes: ["Always put `-delete` last. Written first, it deletes everything under the path before any test is applied."],
       trouble: [["find: paths must precede expression", "An unquoted pattern was expanded by the shell. Put the pattern in quotes: `-name '*.log'`."]],
       tags: ["search files", "locate"],
+      related: ["tools/fd", "grep", "xargs", "ls"],
     },
     {
       id: "grep",
@@ -207,6 +256,7 @@ const linux: Category = {
         ["Three lines of context around each match", "grep -C 3 'Exception' app.log"],
       ],
       tags: ["search text", "filter", "regex"],
+      related: ["tools/rg", "find", "sed", "awk"],
     },
     {
       id: "sed",
@@ -236,6 +286,7 @@ const linux: Category = {
         "On macOS, `-i` needs an argument: write `sed -i '' 's/a/b/' file`.",
       ],
       tags: ["replace", "substitute", "edit text"],
+      related: ["grep", "awk", "sort"],
     },
     {
       id: "awk",
@@ -259,6 +310,7 @@ const linux: Category = {
         ["Count requests per client address", "awk '{count[$1]++} END {for (ip in count) print count[ip], ip}' access.log | sort -rn | head"],
       ],
       tags: ["columns", "fields", "text processing"],
+      related: ["sed", "grep", "sort"],
     },
     {
       id: "sort",
@@ -286,6 +338,7 @@ const linux: Category = {
       ],
       notes: ["`uniq` only removes neighbouring duplicates, so sort first."],
       tags: ["uniq", "count", "order", "wc"],
+      related: ["awk", "grep", "du"],
     },
     {
       id: "xargs",
@@ -308,6 +361,7 @@ const linux: Category = {
         ["Use each item in the middle of a command", "ls *.png | xargs -I {} cp {} backup/{}"],
       ],
       tags: ["pipe", "arguments", "parallel"],
+      related: ["find", "grep", "rm"],
     },
     {
       id: "tar-create",
@@ -333,6 +387,7 @@ const linux: Category = {
         ["Pack and send to another machine in one step", "tar -czf - project/ | ssh deploy@example.com 'tar -xzf - -C /srv'"],
       ],
       tags: ["archive", "compress", "gzip", "tarball", "zip"],
+      related: ["tar-extract", "du", "ssh/scp"],
     },
     {
       id: "tar-extract",
@@ -355,6 +410,7 @@ const linux: Category = {
         ["Unpack a zip file", "unzip archive.zip -d target-dir/"],
       ],
       tags: ["unpack", "untar", "decompress", "unzip"],
+      related: ["tar-create", "ls", "cd"],
     },
     {
       id: "chmod",
@@ -383,6 +439,7 @@ const linux: Category = {
         "`chmod -R 777` makes everything writable by every user on the machine. It is almost never the right fix.",
       ],
       tags: ["permissions", "executable", "mode"],
+      related: ["chown", "ls", "mkdir"],
     },
     {
       id: "chown",
@@ -401,6 +458,7 @@ const linux: Category = {
       ],
       examples: [["Take ownership of a directory yourself", "sudo chown -R \"$USER\":\"$USER\" ~/project"]],
       tags: ["owner", "group", "permissions"],
+      related: ["chmod", "ls"],
     },
     {
       id: "ps",
@@ -423,6 +481,7 @@ const linux: Category = {
         ["See which process started which", "ps -ef --forest"],
       ],
       tags: ["processes", "pid", "memory", "cpu", "top"],
+      related: ["kill", "tools/watch", "networking/ss", "cheatsheets/shell"],
     },
     {
       id: "kill",
@@ -446,6 +505,7 @@ const linux: Category = {
         ["Free a port by stopping whatever listens on it", "kill $(lsof -t -i:3000)"],
       ],
       tags: ["stop", "terminate", "signal", "pkill"],
+      related: ["ps", "systemctl", "networking/ss"],
     },
     {
       id: "df",
@@ -466,6 +526,7 @@ const linux: Category = {
         ["Space is not freed after deleting a large file", "A running process still has it open. Find it with `lsof +L1` and restart that process."],
       ],
       tags: ["disk space", "free space", "filesystem"],
+      related: ["du", "docker/system-prune", "journalctl"],
     },
     {
       id: "du",
@@ -487,6 +548,7 @@ const linux: Category = {
         ["The twenty largest files and directories below here", "du -ah . | sort -rh | head -n 20"],
       ],
       tags: ["disk usage", "size", "folder size"],
+      related: ["df", "sort", "ls"],
     },
     {
       id: "tail",
@@ -509,6 +571,7 @@ const linux: Category = {
         ["Everything except the header line", "tail -n +2 data.csv"],
       ],
       tags: ["logs", "follow", "head", "watch file"],
+      related: ["journalctl", "grep", "docker/logs"],
     },
     {
       id: "systemctl",
@@ -534,6 +597,7 @@ const linux: Category = {
       ],
       trouble: [["Job for a service failed", "Read the reason with `systemctl status <unit>` and `journalctl -u <unit> -n 50 --no-pager`."]],
       tags: ["service", "daemon", "systemd", "restart"],
+      related: ["journalctl", "ps", "kill"],
     },
     {
       id: "journalctl",
@@ -561,6 +625,7 @@ const linux: Category = {
         ["Keep only the last week of logs", "sudo journalctl --vacuum-time=7d"],
       ],
       tags: ["logs", "systemd", "service logs"],
+      related: ["systemctl", "tail", "grep"],
     },
     {
       id: "crontab",
@@ -591,6 +656,7 @@ const linux: Category = {
       ],
       trouble: [["The job works in my shell but not from cron", "Cron has a minimal PATH and does not read your shell profile. Use absolute paths, and log the output with `>> /tmp/job.log 2>&1` to see the error."]],
       tags: ["cron", "schedule", "timer", "job"],
+      related: ["systemctl", "journalctl", "tail"],
     },
     {
       id: "apt",
@@ -618,6 +684,7 @@ const linux: Category = {
         "Other distributions: `sudo dnf install` on Fedora and RHEL, `sudo pacman -S` on Arch, `brew install` on macOS.",
       ],
       tags: ["install", "package manager", "dnf", "pacman", "brew"],
+      related: ["systemctl", "languages/pip", "languages/npm-install"],
     },
   ],
 }
