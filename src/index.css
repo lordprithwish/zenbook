@@ -171,6 +171,59 @@
     background-color: color-mix(in oklch, var(--link) 25%, transparent);
     }
 }
+/*
+ * Landing page motion. Apart from the marquee loop it is all tied to the scrollbar,
+ * and it only moves translate and opacity. It is decoration: without scroll timelines,
+ * or when the reader asked for less motion, none of it applies and the page is complete.
+ */
+@keyframes shift {
+  from { translate: var(--from, 0 0); }
+  to { translate: var(--to, 0 0); }
+}
+@keyframes reveal {
+  from { opacity: 0; translate: 0 2.5rem; }
+}
+@keyframes lit {
+  from { opacity: 0.18; }
+}
+@keyframes marquee {
+  to { translate: -50% 0; }
+}
+@layer components {
+  @media (prefers-reduced-motion: no-preference) {
+    /* An endless band. Its content is rendered twice, so half its width is one loop. */
+    .marquee {
+      animation: marquee 80s linear infinite;
+    }
+    @supports (animation-timeline: view()) {
+      .scrub, .reveal, .lit > span {
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        /* Firefox skips a scroll-driven animation that has no duration. */
+        animation-duration: 1ms;
+        animation-timeline: view();
+      }
+      /* Travels from --from to --to while it crosses the viewport: parallax, or a sideways slide. */
+      .scrub {
+        animation-name: shift;
+      }
+      /* Rises into place as it enters. */
+      .reveal {
+        animation-name: reveal;
+        animation-range: entry 0% cover 22%;
+      }
+      /* Words go from dim to full in reading order as their paragraph moves up. --at is 0 to 1. */
+      .lit {
+        view-timeline-name: --lit;
+      }
+      .lit > span {
+        animation-name: lit;
+        animation-timeline: --lit;
+        animation-range: cover calc(18% + var(--at) * 30%) cover calc(28% + var(--at) * 30%);
+      }
+    }
+  }
+}
 /* Mono for interface labels (buttons, navigation). Code keeps its exact spacing; labels read better tighter. */
 @utility label-mono {
   font-family: var(--font-mono);
